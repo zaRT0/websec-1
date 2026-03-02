@@ -22,6 +22,13 @@ body {
     max-width: 600px;
 }
 
+.result-container__placeholder {
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 15px;
+    color: #c95b5b;
+}
+
 .input-group {
     display: flex;
     align-items: center;
@@ -162,4 +169,10 @@ body {
         font-size: 18px;
         padding: 15px;
     }
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }

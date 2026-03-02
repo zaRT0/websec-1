@@ -6,51 +6,9 @@ const operatorSelect = document.getElementById('operator');
 const calculateBtn = document.getElementById('calculateBtn');
 const resultContainer = document.getElementById('resultContainer');
 
-function validateInput(input) {
-    let value = input.value.replace(/[^0-9.\-]/g, '');
-    
-    if (value.length > 0 && value[0] !== '-') {
-        value = value.replace(/\-/g, '');
-    } else if (value.length > 1) {
-        value = '-' + value.substring(1).replace(/\-/g, '');
-    }
-    
-    const dots = value.match(/\./g);
-    if (dots && dots.length > 1) {
-        const parts = value.split('.');
-        value = parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '');
-    }
-    
-    if (/^[+*/]/.test(value)) {
-        value = value.substring(1);
-    }
-    
-    if (value.startsWith('.')) {
-        value = '0' + value;
-    }
-    
-    return value;
+if (!firstNumberInput || !secondNumberInput || !operatorSelect || !calculateBtn || !resultContainer) {
+    throw new Error('Необходимые элементы не найдены в DOM');
 }
-
-[firstNumberInput, secondNumberInput].forEach(input => {
-    input.addEventListener('input', function() {
-        const oldValue = this.value;
-        const newValue = validateInput(this);
-        
-        if (newValue !== oldValue) {
-            this.value = newValue;
-        }
-        
-        this.classList.remove('error');
-    });
-
-    input.addEventListener('keypress', function(e) {
-        const char = String.fromCharCode(e.which);
-        if (!/[0-9.\-]/.test(char)) {
-            e.preventDefault();
-        }
-    });
-});
 
 function calculate() {
     const firstValue = firstNumberInput.value.trim();
@@ -60,22 +18,15 @@ function calculate() {
     firstNumberInput.classList.remove('error');
     secondNumberInput.classList.remove('error');
 
-    if (!firstValue && !secondValue) {
-        firstNumberInput.classList.add('error');
-        secondNumberInput.classList.add('error');
-        showError('Введите оба числа');
-        return;
-    }
+    if (!firstValue || !secondValue) {
+        let errorText = `Введите ${!firstValue ? 'первое' : 'второе'} число`;
+        if (!firstValue && !secondValue)
+            errorText = 'Введите оба числа';
 
-    if (!firstValue) {
-        firstNumberInput.classList.add('error');
-        showError('Введите первое число');
-        return;
-    }
+        if (!firstValue) firstNumberInput.classList.add('error');
+        if (!secondValue) secondNumberInput.classList.add('error');
 
-    if (!secondValue) {
-        secondNumberInput.classList.add('error');
-        showError('Введите второе число');
+        showError(errorText);
         return;
     }
 
@@ -118,7 +69,7 @@ function calculate() {
             break;
         case '/':
             result = num1 / num2;
-            result = Math.round(result * 1000000) / 1000000;
+            result.toFixed(6);
             operation = `${num1} ÷ ${num2} = ${result}`;
             break;
     }
@@ -136,17 +87,10 @@ function showError(message) {
 }
 
 function displayResults() {
-    let html = '';
-    
-    if (calculationHistory.length > 1) {
-        for (let i = 0; i < calculationHistory.length - 1; i++) {
-            html += `<div class="result-item">${calculationHistory[i]}</div>`;
-        }
-    }
-    
-    html += `<div class="result-item success">${calculationHistory[calculationHistory.length - 1]}</div>`;
-    
-    resultContainer.innerHTML = html;
+    resultContainer.innerHTML = calculationHistory.map((item, index) => {  
+    const checkLast = index === calculationHistory.length - 1;  
+    return `<div class="result-item ${checkLast ? 'current' : ''}">${item}</div>`  
+})
 }
 
 calculateBtn.addEventListener('click', calculate);
@@ -156,6 +100,10 @@ calculateBtn.addEventListener('click', calculate);
         if (e.key === 'Enter') {
             calculate();
         }
+    });
+    
+    input.addEventListener('input', function() {
+        this.classList.remove('error');
     });
 });
 
